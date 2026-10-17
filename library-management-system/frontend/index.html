@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Kütüphane Yönetim Sistemi</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">📚</span>
+      <div>
+        <h1>Üniversite Kütüphanesi</h1>
+        <p>Kitap ara · ödünç al · iade et</p>
+      </div>
+    </div>
+    <div id="sessionInfo" class="session hidden"></div>
+    <button type="button" id="logoutBtn" class="btn ghost hidden">Çıkış</button>
+  </header>
+
+  <main class="layout">
+    <aside class="panel auth-panel" id="authPanel">
+      <h2>Oturum</h2>
+      <div class="tabs">
+        <button type="button" class="tab active" data-tab="login">Giriş</button>
+        <button type="button" class="tab" data-tab="register">Kayıt (Öğrenci)</button>
+      </div>
+
+      <form id="loginForm" class="form">
+        <label>E-posta<input type="email" name="email" required /></label>
+        <label>Şifre<input type="password" name="password" required /></label>
+        <label class="checkbox">
+          <input type="checkbox" name="as_admin" /> Yönetici girişi
+        </label>
+        <button type="submit" class="btn primary">Giriş Yap</button>
+      </form>
+
+      <form id="registerForm" class="form hidden">
+        <label>Öğrenci No<input name="student_number" required /></label>
+        <label>Ad Soyad<input name="full_name" required /></label>
+        <label>E-posta<input type="email" name="email" required /></label>
+        <label>Bölüm<input name="department" /></label>
+        <label>Şifre<input type="password" name="password" minlength="6" required /></label>
+        <button type="submit" class="btn primary">Kayıt Ol</button>
+      </form>
+      <p class="hint">Demo: ogrenci@universite.edu.tr / ogrenci123 · admin@universite.edu.tr / admin123</p>
+    </aside>
+
+    <section class="content">
+      <div class="toolbar">
+        <input type="search" id="searchInput" placeholder="Kitap, yazar veya ISBN ara..." />
+        <button type="button" id="searchBtn" class="btn">Ara</button>
+        <button type="button" id="refreshBooksBtn" class="btn ghost">Yenile</button>
+      </div>
+
+      <div id="adminTools" class="admin-tools hidden">
+        <h2>Yönetici — Yeni Kitap</h2>
+        <form id="addBookForm" class="form grid-form">
+          <label>ISBN<input name="isbn" required /></label>
+          <label>Başlık<input name="title" required /></label>
+          <label>Yazar<input name="author" required /></label>
+          <label>Kategori<input name="category" /></label>
+          <label>Kopya<input type="number" name="total_copies" min="1" value="1" /></label>
+          <label class="full">Açıklama<textarea name="description" rows="2"></textarea></label>
+          <button type="submit" class="btn primary">Kitap Ekle</button>
+        </form>
+        <button type="button" id="overdueBtn" class="btn warn">Gecikme Raporu</button>
+        <div id="overdueReport" class="report hidden"></div>
+      </div>
+
+      <h2>Kitaplar</h2>
+      <div id="booksGrid" class="books-grid"></div>
+
+      <h2 id="loansTitle" class="hidden">Ödünçlerim</h2>
+      <div id="loansList" class="loans-list"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="/js/app.js"></script>
+</body>
+</html>
