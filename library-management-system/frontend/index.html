@@ -20,61 +20,73 @@
   </header>
 
   <main class="layout">
-    <aside class="panel auth-panel" id="authPanel">
-      <h2>Oturum</h2>
-      <div class="tabs">
-        <button type="button" class="tab active" data-tab="login">Giriş</button>
-        <button type="button" class="tab" data-tab="register">Kayıt (Öğrenci)</button>
+
+    <!-- TEK SOL PANEL — içeriği role göre değişir -->
+    <aside class="panel side-panel" id="leftPanel">
+
+      <!-- 1) AUTH (giriş/kayıt) -->
+      <div id="authView">
+        <h2>Oturum</h2>
+        <div class="tabs">
+          <button type="button" class="tab active" data-tab="login">Giriş</button>
+          <button type="button" class="tab" data-tab="register">Kayıt (Öğrenci)</button>
+        </div>
+        <form id="loginForm" class="form">
+          <label>E-posta<input type="email" name="email" required /></label>
+          <label>Şifre<input type="password" name="password" required /></label>
+          <label class="checkbox">
+            <input type="checkbox" name="as_admin" /> Yönetici girişi
+          </label>
+          <button type="submit" class="btn primary full-width">Giriş Yap</button>
+        </form>
+        <form id="registerForm" class="form hidden">
+          <label>Öğrenci No<input name="student_number" required /></label>
+          <label>Ad Soyad<input name="full_name" required /></label>
+          <label>E-posta<input type="email" name="email" required /></label>
+          <label>Bölüm<input name="department" /></label>
+          <label>Şifre<input type="password" name="password" minlength="6" required /></label>
+          <button type="submit" class="btn primary full-width">Kayıt Ol</button>
+        </form>
+        <p class="hint">Demo: ogrenci@universite.edu.tr / ogrenci123 · admin@universite.edu.tr / admin123</p>
       </div>
 
-      <form id="loginForm" class="form">
-        <label>E-posta<input type="email" name="email" required /></label>
-        <label>Şifre<input type="password" name="password" required /></label>
-        <label class="checkbox">
-          <input type="checkbox" name="as_admin" /> Yönetici girişi
-        </label>
-        <button type="submit" class="btn primary">Giriş Yap</button>
-      </form>
+      <!-- 2) YÖNETİCİ görünümü -->
+      <div id="adminView" class="hidden">
+        <h2>🛠 Yönetici</h2>
+        <h3>Yeni Kitap Ekle</h3>
+        <form id="addBookForm" class="form">
+          <label>ISBN<input name="isbn" required /></label>
+          <label>Başlık<input name="title" required /></label>
+          <label>Yazar<input name="author" required /></label>
+          <label>Kategori<input name="category" /></label>
+          <label>Kopya<input type="number" name="total_copies" min="1" value="1" /></label>
+          <label>Açıklama<textarea name="description" rows="2"></textarea></label>
+          <button type="submit" class="btn primary full-width">Kitap Ekle</button>
+        </form>
+        <hr class="divider" />
+        <button type="button" id="overdueBtn" class="btn warn full-width">📋 Gecikme Raporu</button>
+        <div id="overdueReport" class="report hidden"></div>
+      </div>
 
-      <form id="registerForm" class="form hidden">
-        <label>Öğrenci No<input name="student_number" required /></label>
-        <label>Ad Soyad<input name="full_name" required /></label>
-        <label>E-posta<input type="email" name="email" required /></label>
-        <label>Bölüm<input name="department" /></label>
-        <label>Şifre<input type="password" name="password" minlength="6" required /></label>
-        <button type="submit" class="btn primary">Kayıt Ol</button>
-      </form>
-      <p class="hint">Demo: ogrenci@universite.edu.tr / ogrenci123 · admin@universite.edu.tr / admin123</p>
+      <!-- 3) ÖĞRENCİ görünümü -->
+      <div id="studentView" class="hidden">
+        <h2>📖 Ödünçlerim</h2>
+        <div id="loansList" class="loans-list"></div>
+      </div>
+
     </aside>
 
+    <!-- SAĞ: KİTAPLAR — her zaman görünür -->
     <section class="content">
       <div class="toolbar">
         <input type="search" id="searchInput" placeholder="Kitap, yazar veya ISBN ara..." />
         <button type="button" id="searchBtn" class="btn">Ara</button>
         <button type="button" id="refreshBooksBtn" class="btn ghost">Yenile</button>
       </div>
-
-      <div id="adminTools" class="admin-tools hidden">
-        <h2>Yönetici — Yeni Kitap</h2>
-        <form id="addBookForm" class="form grid-form">
-          <label>ISBN<input name="isbn" required /></label>
-          <label>Başlık<input name="title" required /></label>
-          <label>Yazar<input name="author" required /></label>
-          <label>Kategori<input name="category" /></label>
-          <label>Kopya<input type="number" name="total_copies" min="1" value="1" /></label>
-          <label class="full">Açıklama<textarea name="description" rows="2"></textarea></label>
-          <button type="submit" class="btn primary">Kitap Ekle</button>
-        </form>
-        <button type="button" id="overdueBtn" class="btn warn">Gecikme Raporu</button>
-        <div id="overdueReport" class="report hidden"></div>
-      </div>
-
       <h2>Kitaplar</h2>
       <div id="booksGrid" class="books-grid"></div>
-
-      <h2 id="loansTitle" class="hidden">Ödünçlerim</h2>
-      <div id="loansList" class="loans-list"></div>
     </section>
+
   </main>
 
   <div id="toast" class="toast hidden"></div>

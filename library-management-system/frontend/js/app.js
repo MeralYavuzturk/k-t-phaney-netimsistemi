@@ -12,16 +12,16 @@ const els = {
   toast: document.getElementById("toast"),
   sessionInfo: document.getElementById("sessionInfo"),
   logoutBtn: document.getElementById("logoutBtn"),
-  authPanel: document.getElementById("authPanel"),
+  authView: document.getElementById("authView"),
+  adminView: document.getElementById("adminView"),
+  studentView: document.getElementById("studentView"),
   loginForm: document.getElementById("loginForm"),
   registerForm: document.getElementById("registerForm"),
   booksGrid: document.getElementById("booksGrid"),
   searchInput: document.getElementById("searchInput"),
   searchBtn: document.getElementById("searchBtn"),
   refreshBooksBtn: document.getElementById("refreshBooksBtn"),
-  loansTitle: document.getElementById("loansTitle"),
   loansList: document.getElementById("loansList"),
-  adminTools: document.getElementById("adminTools"),
   addBookForm: document.getElementById("addBookForm"),
   overdueBtn: document.getElementById("overdueBtn"),
   overdueReport: document.getElementById("overdueReport"),
@@ -30,7 +30,9 @@ const els = {
 function toast(msg, type = "success") {
   els.toast.textContent = msg;
   els.toast.className = `toast ${type}`;
-  setTimeout(() => els.toast.classList.add("hidden"), 3500);
+  els.toast.classList.remove("hidden");
+  clearTimeout(els._toastTimer);
+  els._toastTimer = setTimeout(() => els.toast.classList.add("hidden"), 4000);
 }
 
 async function api(path, options = {}) {
@@ -38,7 +40,20 @@ async function api(path, options = {}) {
   if (state.token) headers.Authorization = `Bearer ${state.token}`;
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.detail || (typeof data.detail === "object" ? JSON.stringify(data.detail) : "İstek başarısız"));
+  if (!res.ok) {
+    let msg;
+    if (typeof data.detail === "string") {
+      msg = data.detail;
+    } else if (Array.isArray(data.detail)) {
+      // Pydantic validation hataları: [{loc, msg, type}, ...]
+      msg = data.detail.map(e => e.msg || JSON.stringify(e)).join(" · ");
+    } else if (data.detail) {
+      msg = JSON.stringify(data.detail);
+    } else {
+      msg = "İstek başarısız";
+    }
+    throw new Error(msg);
+  }
   return data;
 }
 
@@ -62,16 +77,23 @@ function clearSession() {
 
 function refreshUI() {
   const loggedIn = Boolean(state.token);
+  const isAdmin = state.role === "admin";
+  const isStudent = state.role === "student";
+
   els.sessionInfo.classList.toggle("hidden", !loggedIn);
   els.logoutBtn.classList.toggle("hidden", !loggedIn);
-  els.authPanel.classList.toggle("hidden", loggedIn);
-  els.adminTools.classList.toggle("hidden", state.role !== "admin");
-  els.loansTitle.classList.toggle("hidden", state.role !== "student");
+
+  // Sol panel içerikleri: sadece ilgili view göster
+  els.authView.classList.toggle("hidden", loggedIn);
+  els.adminView.classList.toggle("hidden", !isAdmin);
+  els.studentView.classList.toggle("hidden", !isStudent);
+
   if (loggedIn) {
-    els.sessionInfo.textContent = `${state.name} (${state.role === "admin" ? "Yönetici" : "Öğrenci"})`;
+    els.sessionInfo.textContent = `${state.name} (${isAdmin ? "Yönetici" : "Öğrenci"})`;
     loadBooks();
-    if (state.role === "student") loadMyLoans();
-    else {
+    if (isStudent) {
+      loadMyLoans();
+    } else {
       els.loansList.innerHTML = "";
       els.overdueReport.classList.add("hidden");
     }
@@ -220,14 +242,26 @@ els.addBookForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
   const payload = Object.fromEntries(fd.entries());
-  payload.total_copies = Number(payload.total_copies || 1);
+
+  // Tip dönüşümleri
+  payload.total_copies = Number(payload.total_copies) || 1;
+  // Boş string alanları null'a çevir
+  if (!payload.description) payload.description = null;
+  if (!payload.category) payload.category = null;
+
+  const btn = e.target.querySelector("button[type=submit]");
+  btn.disabled = true;
+  btn.textContent = "Ekleniyor...";
   try {
     await api("/books", { method: "POST", body: JSON.stringify(payload) });
     e.target.reset();
-    toast("Kitap eklendi");
+    toast("✅ Kitap eklendi");
     loadBooks();
   } catch (err) {
     toast(err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Kitap Ekle";
   }
 });
 
